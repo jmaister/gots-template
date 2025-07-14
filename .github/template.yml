@@ -1,0 +1,28 @@
+name: "GOTS Template"
+description: "🚀 Production-ready full-stack application template with Go backend, React dashboard, authentication, analytics, and more"
+topics:
+  - fullstack
+  - web-application
+  - go
+  - react
+  - typescript
+  - authentication
+  - oauth2
+  - session-management
+  - analytics
+  - middleware
+  - rest-api
+  - dashboard
+  - template
+include:
+  - "**/*"
+exclude:
+  - "gots-template.db*"
+  - "tg"
+  - "tg.exe"
+  - "dist/"
+  - "cover.out"
+  - "coverage.html"
+  - "webapp/node_modules/"
+  - "webapp/dist/"
+  - ".env"

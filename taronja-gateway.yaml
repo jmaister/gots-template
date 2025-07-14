@@ -1,0 +1,44 @@
+name: GOTS Gateway Configuration
+server:
+  host: 127.0.0.1
+  port: 8080
+  url: http://localhost:8080
+management:
+  prefix: _
+  logging: true
+  analytics: true
+  admin:
+    # Admin access to the dashboard
+    # Only this user can access the /_/admin/ dashboard
+    enabled: true
+    username: admin
+    password: admin123  # This will be automatically hashed for security
+
+routes:
+  - name: App
+    from: /
+    to: http://localhost:8081
+
+authenticationProviders:
+  basic:
+    enabled: true
+  google:
+    clientId: ${GOOGLE_CLIENT_ID}
+    clientSecret: ${GOOGLE_CLIENT_SECRET}
+  github:
+    clientId: ${GITHUB_CLIENT_ID}
+    clientSecret: ${GITHUB_CLIENT_SECRET}
+
+geolocation:
+  iplocateApiKey: ${IPLOCATE_IO_API_KEY}
+
+notification:
+  email:
+    enabled: true
+    smtp:
+      host: 127.0.0.1
+      port: 1025
+      username: ${SMTP_USERNAME}
+      password: ${SMTP_PASSWORD}
+      from: ${SMTP_FROM}
+      fromName: ${SMTP_FROM_NAME}

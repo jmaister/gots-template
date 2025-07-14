@@ -1,0 +1,45 @@
+openapi: 3.0.0
+info:
+  title: GOTS API
+  version: v1.0.0
+  description: API specification for the GOTS Template application
+
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: healthCheck
+      description: Returns the health status of the application
+      responses:
+        '200':
+          description: Health check successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The health status of the application
+          example: "ok"
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the health check was performed
+          example: "2023-10-01T12:00:00Z"
+        version:
+          type: string
+          description: Application version
+          example: "1.0.0"
+        uptime:
+          type: string
+          description: How long the application has been running
+          example: "2h30m45s"
+      required:
+        - status
+        - timestamp

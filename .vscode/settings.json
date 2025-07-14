@@ -1,0 +1,18 @@
+{
+    "mcpServers": {
+        "filesystem": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "/Users/jordi/workspace/gots-template",
+                "/Users/jordi/workspace/gots-template/webapp",
+                "/Users/jordi/workspace/gots-template/api"
+            ]
+        },
+        "fetch": {
+            "command": "docker",
+            "args": ["run", "-i", "--rm", "mcp/fetch"]
+        }
+    }
+}

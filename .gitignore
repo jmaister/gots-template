@@ -1,0 +1,23 @@
+
+# JMeter result files
+jmeter/
+jmeter.log
+
+# Go build artifacts
+dist/
+cover.out
+coverage.html
+
+# Environment files
+.env
+
+# DB files
+*.db
+*.db-shm
+*.db-wal
+
+# Node.js dependencies
+webapp/node_modules/
+webapp/dist/
+
+*.pid
