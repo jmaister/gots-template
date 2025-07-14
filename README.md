@@ -11,6 +11,10 @@ A production-ready full-stack application template with Go backend, React fronte
 - **Tailwind 4** - Modern CSS framework
 - **SQLite** - Embedded database
 
+## Requirements
+
+- **Taronja Gateway** - Must be installed first. Get it from [jmaister/taronja-gateway](https://github.com/jmaister/taronja-gateway)
+
 ## How to Use
 
 1. Click "Use this template" on GitHub

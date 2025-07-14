@@ -5,14 +5,7 @@
 
 set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
-echo -e "${BLUE}🚀 GOTS Template Setup${NC}"
+echo "🚀 GOTS Template Setup"
 echo "This script will help you set up a new project from the GOTS Template."
 echo
 
@@ -37,7 +30,7 @@ validate_not_empty() {
     local field="$2"
     
     if [ -z "$value" ]; then
-        echo -e "${RED}Error: $field cannot be empty${NC}"
+        echo "Error: $field cannot be empty"
         exit 1
     fi
 }
@@ -47,7 +40,7 @@ validate_module_name() {
     local module="$1"
     
     if [[ ! "$module" =~ ^[a-zA-Z0-9._-]+(/[a-zA-Z0-9._-]+)*$ ]]; then
-        echo -e "${RED}Error: Invalid Go module name format${NC}"
+        echo "Error: Invalid Go module name format"
         echo "Module name should be in format: domain.com/username/project-name"
         exit 1
     fi
@@ -56,7 +49,7 @@ validate_module_name() {
 # Get current directory name as default project name
 current_dir=$(basename "$(pwd)")
 
-echo -e "${YELLOW}📝 Project Configuration${NC}"
+echo "📝 Project Configuration"
 echo
 
 # Collect project information
@@ -76,7 +69,7 @@ AUTHOR_NAME=$(prompt_with_default "Author name" "$(git config user.name 2>/dev/n
 AUTHOR_EMAIL=$(prompt_with_default "Author email" "$(git config user.email 2>/dev/null || echo '')")
 
 echo
-echo -e "${YELLOW}📋 Configuration Summary${NC}"
+echo "📋 Configuration Summary"
 echo "Project Name: $PROJECT_NAME"
 echo "Binary Name: $BINARY_NAME"
 echo "Module Name: $MODULE_NAME"
@@ -91,7 +84,7 @@ if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
 fi
 
 echo
-echo -e "${GREEN}🔧 Setting up your project...${NC}"
+echo "🔧 Setting up your project..."
 
 # Step 1: Update go.mod
 echo "📦 Updating Go module..."
@@ -128,7 +121,51 @@ sed -i.bak "s|title: GOTS API|title: $PROJECT_NAME API|g" api/openapi-spec.yaml
 sed -i.bak "s|description: API specification for the GOTS Template application|description: API specification for $PROJECT_NAME|g" api/openapi-spec.yaml
 rm api/openapi-spec.yaml.bak
 
-# Step 7: Clean git history (optional)
+# Step 7: Create .env file from .env.sample
+echo "🔧 Creating .env file from .env.sample..."
+if [ -f .env.sample ]; then
+    if [ ! -f .env ]; then
+        cp .env.sample .env
+        echo "✅ Created .env file. Please update it with your configuration values."
+    else
+        echo "⚠️  .env file already exists, skipping creation."
+    fi
+else
+    echo "⚠️  .env.sample not found, skipping .env creation."
+fi
+
+# Step 8: Update README.md
+echo "📝 Updating README.md..."
+if [ -f README.md ]; then
+    sed -i.bak "s|# GOTS Template|# $PROJECT_NAME|g" README.md
+    sed -i.bak "s|A production-ready full-stack application template|$DESCRIPTION|g" README.md
+    sed -i.bak "s|Run \`./setup-template.sh\` to customize for your project|Project has been set up and customized|g" README.md
+    sed -i.bak "s|make run|./$BINARY_NAME run|g" README.md
+    rm README.md.bak
+    echo "✅ Updated README.md with project information."
+fi
+
+# Step 9: Update main.go CLI descriptions
+echo "🔧 Updating CLI descriptions in main.go..."
+if [ -f main.go ]; then
+    sed -i.bak "s|GOTS Template CLI|$PROJECT_NAME CLI|g" main.go
+    sed -i.bak "s|A CLI for managing and running the GOTS Template application|A CLI for managing and running $PROJECT_NAME|g" main.go
+    sed -i.bak "s|GOTS Template|$PROJECT_NAME|g" main.go
+    sed -i.bak "s|Run the GOTS Template application|Run the $PROJECT_NAME application|g" main.go
+    sed -i.bak "s|Starts the GOTS Template application|Starts the $PROJECT_NAME application|g" main.go
+    rm main.go.bak
+    echo "✅ Updated CLI descriptions in main.go."
+fi
+
+# Step 10: Update database filename
+echo "🗄️  Updating database configuration..."
+if [ -f db/db.go ]; then
+    sed -i.bak "s|gots-template.db|$PROJECT_NAME.db|g" db/db.go
+    rm db/db.go.bak
+    echo "✅ Updated database filename to $PROJECT_NAME.db."
+fi
+
+# Step 11: Clean git history (optional)
 echo
 read -p "Do you want to reinitialize the git repository? This will remove all commit history. (y/N): " git_reinit
 if [[ "$git_reinit" =~ ^[Yy]$ ]]; then
@@ -137,26 +174,25 @@ if [[ "$git_reinit" =~ ^[Yy]$ ]]; then
     git init
     git add .
     git commit -m "Initial commit: $PROJECT_NAME based on GOTS Template"
-    echo -e "${GREEN}✅ Git repository reinitialized${NC}"
+    echo "✅ Git repository reinitialized"
 else
     echo "📝 Git history preserved. You may want to update the remote origin manually."
 fi
 
-# Step 8: Run go mod tidy
+# Step 12: Run go mod tidy
 echo "📦 Updating Go dependencies..."
 go mod tidy
 
 echo
-echo -e "${GREEN}🎉 Project setup complete!${NC}"
+echo "🎉 Project setup complete!"
 echo
-echo -e "${BLUE}Next Steps:${NC}"
-echo "1. Update the README.md file with your project-specific information"
-echo "2. Configure your OAuth providers (GitHub, Google) if needed"
-echo "3. Update the .env file with your configuration"
-echo "4. Build and run your application:"
-echo "   ${YELLOW}make build${NC}"
-echo "   ${YELLOW}make run${NC}"
+echo "Next Steps:"
+echo "1. Configure your OAuth providers (GitHub, Google) if needed"
+echo "2. Update the .env file with your configuration"
+echo "3. Build and run your application:"
+echo "   make build"
+echo "   ./$BINARY_NAME run"
 echo
 echo "5. Access the web application at: http://localhost:8080"
 echo
-echo -e "${GREEN}Happy coding! 🚀${NC}"
+echo "Happy coding! 🚀"
