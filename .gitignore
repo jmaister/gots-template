@@ -20,4 +20,7 @@ coverage.html
 webapp/node_modules/
 webapp/dist/
 
+# Generated API client files
+webapp/src/apiclient/
+
 *.pid

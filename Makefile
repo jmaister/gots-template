@@ -86,10 +86,12 @@ tidy:
 api-codegen:
 	@echo "Generating OpenAPI code..."
 	@go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config api/cfg.yaml api/openapi-spec.yaml
+	@echo "Generating TypeScript SDK..."
+	@cd webapp && npm run generate-api
 
 install: build
 	cp $(BINARY_NAME) ~/bin/$(BINARY_NAME)
 
 # Default target
-.PHONY: all build build-windows run stop dev test cover clean fmt tidy
+.PHONY: all build build-windows run stop dev test cover clean fmt tidy api-codegen
 all: build
