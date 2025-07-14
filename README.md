@@ -1,150 +1,32 @@
 # GOTS Template
 
-> **🚀 This is a project template!** Use this template to create your own full-stack application.
-> 
-> **Quick Start**: Click "Use this template" on GitHub, then run `./setup-template.sh` in your new repository.
-> 
-> **📖 For detailed instructions, see [TEMPLATE-USAGE.md](TEMPLATE-USAGE.md)**
+A production-ready full-stack application template with Go backend, React frontend, and OpenAPI-generated code.
 
----
+## Tools
 
-GOTS Template (Go, OpenAPI, TypeScript, SQLite) is a production-ready full-stack application template built with Go and React.
+- **Go** - Backend API server with net/http and GORM
+- **TypeScript** - Frontend with React and React Router
+- **Vite** - Fast frontend build tool
+- **OpenAPI** - API specification and code generation
+- **Tailwind 4** - Modern CSS framework
+- **SQLite** - Embedded database
 
-It serves as a foundation for modern web applications, handling routing, authentication, sessions, and many more features, leaving your application code clean and focused on business logic.
+## How to Use
 
-# Features
+1. Click "Use this template" on GitHub
+2. Clone your new repository
+3. Run `./setup-template.sh` to customize for your project
 
-Features table, shows what is implemented and what is planned.
-
-| Feature                       | Status   |
-|-------------------------------|----------|
-| REST API Server               | ✅       |
-| Web Application Frontend      | ✅       |
-| Management Dashboard          | ✅       |
-| Logging                       | ✅       |
-| Analytics and Traffic metrics | ✅       |
-| - User Geo-location           | ✅       |
-| Sessions (Persistent)         | ✅       |
-| User management               | ✅       |
-| Authentication                | ✅       |
-| Authentication: Basic         | ✅       |
-| Authentication: OAuth2        | ✅       |
-| - OAuth2: GitHub              | ✅       |
-| - OAuth2: Google              | ✅       |
-| Authentication: JWT           | 🚧       |
-| Authorization using RBAC      | 🚧       |
-| Feature Flags                 | 🚧       |
-| Rate Limiting                 | 🚧       |
-| Circuit breaker               | 🚧       |
-| Caching                       | 🚧       |
-| Load Balancing                | 🚧       |
-| robots.txt                    | 🚧       |
-| more...                       | 🚧       |
-
-# Installation
-
-### Quick Install (All Platforms)
+## How to Run
 
 ```bash
-curl -fsSL https://github.com/jmaister/gots-template/raw/main/scripts/install.sh | bash
-```
+# Generate OpenAPI code
+make api-codegen
 
-This script detects your OS and architecture, downloads the latest release, and installs it to your system path.
-
-### Windows Installation
-
-```bat
-powershell -Command "Invoke-WebRequest -Uri 'https://github.com/jmaister/gots-template/raw/main/scripts/install.bat' -OutFile 'install.bat'" && install.bat
-```
-
-The Windows installer places the binary in `%USERPROFILE%\bin`. Add this directory to your PATH to use `tg` from anywhere.
-
-# Commands
-
-The GOTS Template CLI provides the following commands:
-
-*   **Run the Application:**
-    ```bash
-    ./tg run
-    ```
-    This command starts the GOTS Template application.
-
-*   **Add a new user:**
-    ```bash
-    ./tg adduser <username> <email> <password>
-    ```
-    This command creates a new user in the database with the provided username, email, and password.
-
-*   **Show the current version:**
-    ```bash
-    ./tg version
-    ```
-
-# Building and Releasing
-
-## Development Builds
-
-```bash
-# Build the binary
+# Build everything
 make build
 
-# Run tests
-make test
-
-# Generate test coverage report
-make cover
-
-# Run in development mode with automatic restart on file changes
-make dev
+# Run the application
+make run
 ```
-
-## Release Process
-
-GOTS Template uses [GoReleaser](https://goreleaser.com/) for building and publishing releases.
-
-```bash
-# Install GoReleaser
-make setup-goreleaser
-
-# Check GoReleaser configuration
-make release-check
-
-# Create a local snapshot release (for testing)
-make release-local
-
-# Build Docker image locally
-make release-docker
-```
-
-## GitHub Releases
-
-When a new version is ready to be released:
-
-1. Tag the commit with a semantic version:
-   ```bash
-   git tag -a v1.0.0 -m "Release v1.0.0"
-   git push origin v1.0.0
-   ```
-
-2. Create a new release on GitHub, pointing to the created tag.
-
-3. The GitHub action will automatically:
-   - Build binaries for multiple platforms
-   - Create Docker images
-   - Generate coverage reports
-   - Publish all artifacts to the GitHub release
-
-## Geolocation Configuration
-
-Configure IP geolocation services in your `config.yaml`:
-
-```yaml
-geolocation:
-  iplocateApiKey: ${IPLOCATE_IO_API_KEY}  # Optional: Use iplocate.io
-```
-
-- **With API key**: Uses [iplocate.io](https://www.iplocate.io) (more accurate, requires API key)
-- **Without API key**: Uses [freeipapi.com](https://freeipapi.com) (free, basic accuracy)
-
-Geolocation data is cached for 7 days to optimize performance and reduce API calls.
 
