@@ -1,5 +1,5 @@
 name: "GOTS Template"
-description: "🚀 Production-ready full-stack application template with Go backend, React dashboard, authentication, analytics, and more"
+description: "🚀 Production-ready full-stack application template with Go backend, React dashboard, OpenAPI, authentication, analytics, and more"
 topics:
   - fullstack
   - web-application
@@ -17,9 +17,6 @@ topics:
 include:
   - "**/*"
 exclude:
-  - "gots-template.db*"
-  - "tg"
-  - "tg.exe"
   - "dist/"
   - "cover.out"
   - "coverage.html"
