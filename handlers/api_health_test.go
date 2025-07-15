@@ -11,7 +11,7 @@ import (
 
 func TestHealthCheck(t *testing.T) {
 	// Create a new StrictApiServer instance
-	s := &StrictApiServer{}
+	s := NewStrictApiServer()
 
 	t.Run("SuccessfulHealthCheck", func(t *testing.T) {
 		// Setup: Create a health check request
@@ -44,7 +44,12 @@ func TestHealthCheck(t *testing.T) {
 
 		// Assert: Uptime should be set
 		assert.NotNil(t, healthResp.Uptime)
-		assert.Equal(t, "0s", *healthResp.Uptime)
+		// Parse the uptime to verify it's a valid duration
+		uptimeDuration, err := time.ParseDuration(*healthResp.Uptime)
+		assert.NoError(t, err, "Uptime should be a valid duration string")
+		// Uptime should be positive and reasonable (less than a few seconds for a test)
+		assert.True(t, uptimeDuration >= 0, "Uptime should be positive")
+		assert.True(t, uptimeDuration < 10*time.Second, "Uptime should be reasonable for a test")
 
 		// Assert: Timestamp should be within a reasonable range (between before and after the call)
 		assert.True(t, healthResp.Timestamp.After(beforeCall) || healthResp.Timestamp.Equal(beforeCall),
