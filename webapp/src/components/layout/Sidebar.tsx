@@ -33,6 +33,7 @@ const Sidebar = ({
 
   const navItems = [
     { name: 'Home', icon: '🏠', path: '/home' },
+    { name: 'Health', icon: '❤️', path: '/health' },
     // Only show Profile link if user is authenticated
     ...(isAuthenticated ? [{ name: 'Profile', icon: '👤', path: '/profile' }] : []),
   ];

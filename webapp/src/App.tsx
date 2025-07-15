@@ -6,6 +6,7 @@ import MainLayout from './components/layout/MainLayout';
 import PublicLayout from './components/layout/PublicLayout';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
+import { HealthPage } from './pages/HealthPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 // Authentication components
@@ -78,6 +79,7 @@ function App() {
                 {/* Public routes that don't require authentication */}
                 <Route element={<PublicLayoutRoutes />}>
                     <Route path="/home" element={<HomePage />} />
+                    <Route path="/health" element={<HealthPage />} />
                 </Route>
 
                 {/* Protected routes that require authentication */}

@@ -15,9 +15,13 @@ management:
     password: admin123  # This will be automatically hashed for security
 
 routes:
+  - name: API
+    from: /api
+    to: http://localhost:8081
   - name: App
     from: /
     to: http://localhost:8081
+
 
 authenticationProviders:
   basic:

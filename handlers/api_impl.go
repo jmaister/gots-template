@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"time"
+
 	"github.com/jmaister/gots-template/api"
 )
 
@@ -8,12 +10,15 @@ import (
 
 // StrictApiServer provides an implementation of the api.StrictServerInterface.
 type StrictApiServer struct {
-	// Currently only implements health check endpoint
+	// StartTime records when the server was started for uptime calculation
+	StartTime time.Time
 }
 
 // NewStrictApiServer creates a new StrictApiServer.
 func NewStrictApiServer() *StrictApiServer {
-	return &StrictApiServer{}
+	return &StrictApiServer{
+		StartTime: time.Now(),
+	}
 }
 
 // Ensure StrictApiServer implements StrictServerInterface

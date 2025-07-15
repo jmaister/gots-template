@@ -14,7 +14,7 @@ build: api-codegen
 	CGO_ENABLED=0 go build -tags=purego -o $(BINARY_NAME) .
 
 # Run target - starts both the application and taronja gateway
-run: build
+run: stop build
 	@echo "Starting $(PROJECT_NAME) and Taronja Gateway..."
 	@./$(BINARY_NAME) run & echo $$! > .app.pid
 	@tg run --config taronja-gateway.yaml & echo $$! > .gateway.pid

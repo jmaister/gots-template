@@ -33,7 +33,7 @@ type HealthResponse struct {
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Health check endpoint
-	// (GET /health)
+	// (GET /api/health)
 	HealthCheck(w http.ResponseWriter, r *http.Request)
 }
 
@@ -180,7 +180,7 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 		ErrorHandlerFunc:   options.ErrorHandlerFunc,
 	}
 
-	m.HandleFunc("GET "+options.BaseURL+"/health", wrapper.HealthCheck)
+	m.HandleFunc("GET "+options.BaseURL+"/api/health", wrapper.HealthCheck)
 
 	return m
 }
@@ -204,7 +204,7 @@ func (response HealthCheck200JSONResponse) VisitHealthCheckResponse(w http.Respo
 // StrictServerInterface represents all server handlers.
 type StrictServerInterface interface {
 	// Health check endpoint
-	// (GET /health)
+	// (GET /api/health)
 	HealthCheck(ctx context.Context, request HealthCheckRequestObject) (HealthCheckResponseObject, error)
 }
 

@@ -5,7 +5,7 @@ info:
   description: API specification for the GOTS Template application
 
 paths:
-  /health:
+  /api/health:
     get:
       summary: Health check endpoint
       operationId: healthCheck
