@@ -9,7 +9,8 @@
     "generate-api": "openapi-ts -i ../api/openapi-spec.yaml -o src/apiclient -c @hey-api/client-fetch",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "analyze": "vite build --mode analyze"
   },
   "dependencies": {
     "@tailwindcss/vite": "4.1.17",
@@ -34,6 +35,7 @@
     "eslint-plugin-react-refresh": "0.4.24",
     "globals": "16.5.0",
     "jsdom": "27.2.0",
+    "rollup-plugin-visualizer": "^6.0.5",
     "typescript": "5.9.3",
     "vite": "7.2.2",
     "vitest": "4.0.8"
