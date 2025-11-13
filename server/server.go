@@ -12,6 +12,9 @@ import (
 	"github.com/jmaister/gots-template/api"
 	"github.com/jmaister/gots-template/db"
 	"github.com/jmaister/gots-template/handlers"
+	"github.com/jmaister/gots-template/services"
+	"github.com/jmaister/gots-template/session"
+	client "github.com/jmaister/taronja-gateway-clients/go"
 )
 
 // ServerConfig holds the server configuration
@@ -27,6 +30,7 @@ type Server struct {
 	HTTPServer     *http.Server
 	Mux            *http.ServeMux
 	UserRepository db.UserRepository
+	MeService      *services.MeService
 	WebappFS       embed.FS
 	WebappPath     string
 }
@@ -49,18 +53,33 @@ func NewServer(serverConfig *ServerConfig) (*Server, error) {
 		Handler:      handler,
 	}
 
+	// Create Taronja Gateway client
+	apiURL := os.Getenv("API_URL")
+	if apiURL == "" {
+		apiURL = "http://localhost:8080" // Default to local Taronja Gateway
+	}
+	apiURL = apiURL + "/_/" // Append Gateway API prefix
+	adminToken := os.Getenv("ADMIN_TOKEN")
+	taronjaClient, err := client.NewClientWithResponses(apiURL)
+	if err != nil {
+		return nil, fmt.Errorf("error creating taronja client: %w", err)
+	}
+
+	meService := services.NewMeService(taronjaClient, adminToken)
+
 	userRepository := db.NewDBUserRepository(db.GetConnection())
 
 	server := &Server{
 		HTTPServer:     httpServer,
 		Mux:            mux,
 		UserRepository: userRepository,
+		MeService:      meService,
 		WebappFS:       serverConfig.WebappFS,
 		WebappPath:     serverConfig.WebappPath,
 	}
 
 	// Configure webapp serving first (will be overridden by more specific routes)
-	err := server.configureWebappRoutes()
+	err = server.configureWebappRoutes()
 	if err != nil {
 		return nil, fmt.Errorf("error configuring webapp routes: %w", err)
 	}
@@ -111,7 +130,11 @@ func (s *Server) configureOpenAPIRoutes() error {
 	// Create the standard API server without middleware
 	standardApiServer := api.NewStrictHandlerWithOptions(
 		strictApiServer,
-		[]api.StrictMiddlewareFunc{}, // No middleware for now
+		// Add middlewares for all endpoints
+		[]api.StrictMiddlewareFunc{
+			session.StrictInjectHTTPRequestMiddleware,
+			session.StrictCORSMiddleware,
+		},
 		strictHandlerOptions,
 	)
 

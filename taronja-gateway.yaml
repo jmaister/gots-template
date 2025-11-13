@@ -1,7 +1,7 @@
 name: GOTS Gateway Configuration
 server:
-  host: 127.0.0.1
-  port: 8080
+  host: ${TG_SERVER_HOST}
+  port: ${TG_SERVER_PORT}
   url: http://localhost:8080
 management:
   prefix: _

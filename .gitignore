@@ -8,6 +8,7 @@ dist/
 cover.out
 coverage.html
 gots
+gots.exe
 
 # Environment files
 .env

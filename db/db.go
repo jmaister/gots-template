@@ -8,6 +8,10 @@ import (
 
 var conn *gorm.DB
 
+func runMigrations(db *gorm.DB) error {
+	return db.AutoMigrate(&User{})
+}
+
 func Init() {
 	// Use modernc.org/sqlite driver (pure Go, no CGO required)
 	// Configure SQLite for better concurrent access and performance
@@ -39,7 +43,7 @@ func Init() {
 	sqlDB.SetConnMaxLifetime(0) // No limit for SQLite
 
 	// Migrate the schema
-	err2 := db.AutoMigrate(&User{})
+	err2 := runMigrations(db)
 	if err2 != nil {
 		panic("Failed to migration DB: " + err2.Error())
 	}
@@ -78,7 +82,7 @@ func InitForTest() {
 	sqlDB.SetConnMaxLifetime(0) // No limit for SQLite
 
 	// Migrate the schema
-	err2 := db.AutoMigrate(&User{})
+	err2 := runMigrations(db)
 	if err2 != nil {
 		panic("Failed to migration DB: " + err2.Error())
 	}

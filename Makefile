@@ -8,7 +8,7 @@ ifeq ($(OS),Windows_NT)
 endif
 
 # Build target
-build: api-codegen
+build: gen
 	@echo "Building $(PROJECT_NAME)..."
 	cd webapp && npm run build
 	CGO_ENABLED=0 go build -tags=purego -o $(BINARY_NAME) .
@@ -83,7 +83,7 @@ tidy:
 	@echo "Tidying dependencies..."
 	go mod tidy
 
-api-codegen:
+gen:
 	@echo "Generating OpenAPI code..."
 	@go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen -config api/cfg.yaml api/openapi-spec.yaml
 	@echo "Installing npm dependencies..."
