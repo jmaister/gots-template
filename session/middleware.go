@@ -3,25 +3,46 @@ package session
 import (
 	"context"
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	strictnethttp "github.com/oapi-codegen/runtime/strictmiddleware/nethttp"
 )
 
-// InjectHTTPRequestMiddleware injects the *http.Request into the context for endpoint handlers.
-func InjectHTTPRequestMiddleware(next func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error), operationName string) func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+// StrictInjectHTTPRequestMiddleware injects the *http.Request and request metadata into the context.
+// Session data is stored as raw JSON and parsed lazily only when GetUserData() is called.
+func StrictInjectHTTPRequestMiddleware(next strictnethttp.StrictHTTPHandlerFunc, operationName string) strictnethttp.StrictHTTPHandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
-		ctx = context.WithValue(ctx, HTTPRequestContextKey, r)
+		// Generate or extract request ID for tracing
+		requestID := r.Header.Get("X-Request-ID")
+		if requestID == "" {
+			requestID = uuid.New().String()
+		}
+
+		// Create request context with raw data (lazy parsing)
+		reqCtx := &RequestContext{
+			RawRequest:  r,
+			RequestID:   requestID,
+			RequestTime: time.Now(),
+		}
+
+		// Parse user ID from header (cheap operation)
+		if userID := r.Header.Get(HeaderUserId); userID != "" {
+			reqCtx.UserID = userID
+			reqCtx.IsAuthenticated = true
+		}
+
+		// Store raw session data for lazy parsing
+		reqCtx.UserDataRaw = r.Header.Get(HeaderUserData)
+
+		// Store the complete context
+		ctx = context.WithValue(ctx, requestContextKey, reqCtx)
 		return next(ctx, w, r, request)
 	}
 }
 
-// StrictInjectHTTPRequestMiddleware adapts InjectHTTPRequestMiddleware to StrictMiddlewareFunc type.
-func StrictInjectHTTPRequestMiddleware(next strictnethttp.StrictHTTPHandlerFunc, operationName string) strictnethttp.StrictHTTPHandlerFunc {
-	return InjectHTTPRequestMiddleware(next, operationName)
-}
-
-// CORSMiddleware allows any domain for CORS requests.
-func CORSMiddleware(next func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error), operationName string) func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
+// StrictCORSMiddleware allows any domain for CORS requests.
+func StrictCORSMiddleware(next strictnethttp.StrictHTTPHandlerFunc, operationName string) strictnethttp.StrictHTTPHandlerFunc {
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, request interface{}) (interface{}, error) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
@@ -32,9 +53,4 @@ func CORSMiddleware(next func(ctx context.Context, w http.ResponseWriter, r *htt
 		}
 		return next(ctx, w, r, request)
 	}
-}
-
-// StrictCORSMiddleware adapts CORSMiddleware to StrictMiddlewareFunc type.
-func StrictCORSMiddleware(next strictnethttp.StrictHTTPHandlerFunc, operationName string) strictnethttp.StrictHTTPHandlerFunc {
-	return CORSMiddleware(next, operationName)
 }

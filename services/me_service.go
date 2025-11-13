@@ -24,10 +24,7 @@ func NewMeService(taronjaClient *client.ClientWithResponses, adminToken string) 
 }
 
 func (s *MeService) GetMe(ctx context.Context) (*client.GetCurrentUserResponse, error) {
-	resp, err := s.client.GetCurrentUserWithResponse(
-		ctx,
-		session.ForwardAuthorizationCookie,
-	)
+	resp, err := s.client.GetCurrentUserWithResponse(ctx, session.ForwardAuthorizationCookie)
 	if err != nil {
 		return nil, err
 	}

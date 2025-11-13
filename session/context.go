@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	client "github.com/jmaister/taronja-gateway-clients/go"
@@ -20,7 +21,20 @@ const (
 // contextKey is a custom type for context keys to avoid collisions.
 type contextKey string
 
-const HTTPRequestContextKey contextKey = "httpRequest"
+const requestContextKey contextKey = "requestContext"
+
+// RequestContext holds all request-related data including the raw request and parsed session.
+// Session data is parsed lazily on first access to avoid unnecessary overhead.
+type RequestContext struct {
+	RawRequest      *http.Request
+	UserID          string
+	UserDataRaw     string   // Raw JSON string for lazy parsing
+	Session         *Session // Parsed lazily on first GetUserData() call
+	IsAuthenticated bool
+	RequestID       string     // Request ID for tracing
+	RequestTime     time.Time  // When the request started
+	mu              sync.Mutex // Protects Session field during lazy parsing
+}
 
 // Session is a copy of db.Session from Taronja Gateway
 type Session struct {
@@ -62,47 +76,71 @@ type Session struct {
 	JA4Fingerprint  string     `json:"JA4Fingerprint"`
 }
 
-func GetUserId(ctx context.Context) (string, error) {
-	req, _ := ctx.Value(HTTPRequestContextKey).(*http.Request)
-	if req == nil {
-		return "", fmt.Errorf("request context is missing")
+// GetRequestContext retrieves the complete request context from the context.
+// This provides access to both the raw request and parsed session data.
+func GetRequestContext(ctx context.Context) (*RequestContext, error) {
+	reqCtx, ok := ctx.Value(requestContextKey).(*RequestContext)
+	if !ok || reqCtx == nil {
+		return nil, fmt.Errorf("request context is missing")
 	}
-
-	userID := req.Header.Get(HeaderUserId)
-	if userID == "" {
-		log.Printf("Error: X-User-ID header is missing")
-		return "", fmt.Errorf("missing user header")
-	}
-
-	return userID, nil
+	return reqCtx, nil
 }
 
-func GetUserData(ctx context.Context) (Session, error) {
-	req, _ := ctx.Value(HTTPRequestContextKey).(*http.Request)
-	if req == nil {
-		return Session{}, fmt.Errorf("request context is missing")
+// GetUserId retrieves the user ID from the request context.
+// This is a simple lookup with no header parsing.
+func (rc *RequestContext) GetUserId() (string, error) {
+	if rc.UserID == "" {
+		return "", fmt.Errorf("user not authenticated")
+	}
+	return rc.UserID, nil
+}
+
+// GetUserData retrieves the session data from the request context.
+// This function performs lazy parsing: the JSON is unmarshaled only on the first call,
+// then cached for subsequent calls within the same request.
+func (rc *RequestContext) GetUserData() (Session, error) {
+	// Lazy parsing with mutex protection
+	rc.mu.Lock()
+	defer rc.mu.Unlock()
+
+	// If already parsed, return cached session
+	if rc.Session != nil {
+		return *rc.Session, nil
 	}
 
-	userData := req.Header.Get(HeaderUserData)
-	if userData == "" {
-		log.Printf("Error: X-User-Data header is missing")
-		return Session{}, fmt.Errorf("missing user header")
+	// Parse session data if not already done
+	if rc.UserDataRaw == "" {
+		return Session{}, fmt.Errorf("session data not available")
 	}
 
 	var session Session
-	err := json.Unmarshal([]byte(userData), &session)
-	if err != nil {
+	if err := json.Unmarshal([]byte(rc.UserDataRaw), &session); err != nil {
 		log.Printf("Error: Failed to unmarshal user data: %v", err)
-		return Session{}, fmt.Errorf("invalid user data")
+		return Session{}, fmt.Errorf("invalid session data: %w", err)
 	}
 
+	// Cache the parsed session
+	rc.Session = &session
 	return session, nil
+}
+
+// GetRawRequest retrieves the raw HTTP request from the request context.
+// Use this when you need direct access to headers, cookies, or other request details.
+func (rc *RequestContext) GetRawRequest() (*http.Request, error) {
+	if rc.RawRequest == nil {
+		return nil, fmt.Errorf("raw request not available")
+	}
+	return rc.RawRequest, nil
 }
 
 // ForwardAuthorizationCookie is a RequestEditorFn that forwards the user's session token as a cookie
 // Use this for operations that need to authenticate as a specific user
 var ForwardAuthorizationCookie client.RequestEditorFn = func(ctx context.Context, req *http.Request) error {
-	userData, err := GetUserData(ctx)
+	reqCtx, err := GetRequestContext(ctx)
+	if err != nil {
+		return err
+	}
+	userData, err := reqCtx.GetUserData()
 	if err != nil {
 		return err
 	}
