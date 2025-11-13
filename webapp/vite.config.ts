@@ -24,8 +24,8 @@ export default defineConfig(({ mode }) => ({
             output: {
                 manualChunks(id) {
                     if (id.includes('node_modules')) {
-                        if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/react-router/') || id.includes('/react-router-dom/')) {
-                            // React in separate chunks
+                        if (id.includes('/react/') || id.includes('/react-dom/') || id.includes('/scheduler/') || id.includes('/react-router/') || id.includes('/react-router-dom/')) {
+                            // React and its dependencies in separate chunks
                             return 'react-vendor';
                         } else if (id.includes('/@tanstack/')) {
                             // TanStack libraries in separate chunks
